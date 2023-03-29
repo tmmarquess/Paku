@@ -1,10 +1,9 @@
 %{
 #include "calc.tab.h" 
 #include <stdlib.h>
-
 void yyerror(char *s); 
 %}
-
+%option yylineno
 %%
 
 [0-9]+("."[0-9]+)? 					{ yylval.double_val = atof(yytext); return NUMBER; }
@@ -22,6 +21,7 @@ void yyerror(char *s);
 ("print_str")						{ return PRINT; }
 [[:space:]]							;
 ("show")							{ return SHOW; }
+(type)								{ return SHOW_TYPE; }
 ([a-zA-Z0-9]+)						{ yylval.str_val = strdup(yytext); return STRING; }	
 [=]									{ return attribuition; }
 .									{ yyerror("Undefined token\n"); }

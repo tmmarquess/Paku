@@ -173,3 +173,28 @@ void print_table(hash_table table)
     }
     printf("\n");
 }
+
+char *get_value(hash_table table, char *name)
+{
+    node *exists = get_item_by_name(table, name);
+    if (exists != NULL)
+    {
+        return exists->value;
+    }
+    else
+    {
+        return "variavel nao declarada";
+    }
+}
+
+char* show_type(hash_table table, char *name){
+    node *exists = get_item_by_name(table, name);
+    if (exists != NULL)
+    {
+        return exists->type;
+    }
+    else
+    {
+        return "variavel nao declarada";
+    }
+}

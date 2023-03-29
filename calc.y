@@ -8,6 +8,7 @@
 #include "hash_table.c"
 #include <math.h>
 extern FILE* yyin;
+extern int yylineno;
 
 void yyerror(char *s);
 int yylex(void);
@@ -24,7 +25,7 @@ hash_table variables;
 %token EOL
 %token PLUS MINUS DIVIDE TIMES MOD POW
 %token SHOW attribuition QUOTE PRINT
-%token P_LEFT P_RIGHT
+%token P_LEFT P_RIGHT SHOW_TYPE
 
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -39,12 +40,14 @@ hash_table variables;
 %%
 
 STATEMENT:
-	STATEMENT EXPRESSION EOL {$$ = $2; printf("Resultado: %f\n", $2);}
+	STATEMENT EXPRESSION EOL {$$ = $2; printf("%f\n", $2);}
 	| STATEMENT TYPE STRING attribuition EXPRESSION EOL {char value[20]; sprintf(value, "%f", $5);insert_value_in_table(variables, value, $3, $2);}
 	| STATEMENT TYPE STRING attribuition QUOTE STRING QUOTE EOL {insert_value_in_table(variables, $6, $3, $2); }
 	| STATEMENT SHOW EOL {print_table(variables);}
 	| STATEMENT PRINT P_LEFT QUOTE STRING QUOTE P_RIGHT EOL {printf("%s\n",$5);}
-	|
+	| STATEMENT STRING EOL {printf("%s\n", get_value(variables, $2));}
+	| STATEMENT SHOW_TYPE P_LEFT STRING P_RIGHT EOL {printf("%s\n", show_type(variables, $4));}
+	| 
 	;
 
 EXPRESSION:
