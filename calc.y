@@ -7,10 +7,15 @@
 #include <stdio.h>
 #include "hash_table.c"
 #include <math.h>
+
+#define YYERROR_VERBOSE 1
+
+extern int column;
+extern char *lineptr;
 extern FILE* yyin;
 extern int yylineno;
 
-void yyerror(char *s);
+void yyerror(const char *s);
 int yylex(void);
 int yyparse();
 
@@ -37,16 +42,19 @@ hash_table variables;
 
 %type <double_val> STATEMENT EXPRESSION
 
+%locations
+%define parse.error verbose
+
 %%
 
 STATEMENT:
-	STATEMENT EXPRESSION EOL {$$ = $2; printf("%f\n", $2);}
-	| STATEMENT TYPE STRING attribuition EXPRESSION EOL {char value[20]; sprintf(value, "%f", $5);insert_value_in_table(variables, value, $3, $2);}
-	| STATEMENT TYPE STRING attribuition QUOTE STRING QUOTE EOL {insert_value_in_table(variables, $6, $3, $2); }
-	| STATEMENT SHOW EOL {print_table(variables);}
+	STATEMENT EXPRESSION EOL {printf("%f\n", $2);}
 	| STATEMENT PRINT P_LEFT QUOTE STRING QUOTE P_RIGHT EOL {printf("%s\n",$5);}
 	| STATEMENT STRING EOL {printf("%s\n", get_value(variables, $2));}
 	| STATEMENT SHOW_TYPE P_LEFT STRING P_RIGHT EOL {printf("%s\n", show_type(variables, $4));}
+	| STATEMENT TYPE STRING attribuition EXPRESSION EOL {char value[20]; sprintf(value, "%f", $5);insert_value_in_table(variables, value, $3, $2);}
+	| STATEMENT TYPE STRING attribuition QUOTE STRING QUOTE EOL {insert_value_in_table(variables, $6, $3, $2); }
+	| STATEMENT SHOW EOL {print_table(variables);}
 	| 
 	;
 
@@ -64,10 +72,13 @@ EXPRESSION:
 
 %%
 
-void yyerror(char *s)
+void yyerror(const char *str)
 {
-	printf("Error: %s\n", s);
-	yyparse();
+    fprintf(stderr,"error: %s in line %d, column %d\n", str, yylineno, column);
+    fprintf(stderr,"%s", lineptr);
+    for(int i = 0; i < column - 1; i++)
+        fprintf(stderr,"_");
+    fprintf(stderr,"^\n");
 }
 
 int main(int argc, char *argv[])
